@@ -14,6 +14,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.MapGet("/helloworld", (int id) => "Hello World");
 app.UseHttpsRedirection();
 
 
