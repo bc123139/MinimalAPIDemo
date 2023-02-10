@@ -1,3 +1,7 @@
+using MagicVilla_CouponAPI.Data;
+using MagicVilla_CouponAPI.Models;
+using Microsoft.AspNetCore.Mvc;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -14,7 +18,36 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.MapGet("/helloworld", (int id) => "Hello World");
+app.MapGet("/api/coupon", ()=> {
+   return Results.Ok(CouponStore.couponList);
+    });
+
+app.MapGet("/api/coupon/{id:int}", (int id) => {
+    return Results.Ok(CouponStore.couponList.FirstOrDefault(x=>x.Id==id));
+});
+
+app.MapPost("/api/coupon", ([FromBody] Coupon coupon) => {
+    if(coupon.Id!=0 && string.IsNullOrWhiteSpace(coupon.Name))
+    {
+        return Results.BadRequest("Invalid id or coupon name");
+    }
+    if (CouponStore.couponList.FirstOrDefault(x=>x.Name.ToLower()==coupon.Name.ToLower()) != null)
+    {
+        return Results.BadRequest("coupon name already exists");
+    }
+    CouponStore.couponList.Add(coupon);
+    
+    return Results.Ok(coupon);
+});
+
+app.MapPut("/api/coupon", (int id) => {
+    return Results.Ok(CouponStore.couponList.FirstOrDefault(x => x.Id == id));
+});
+
+app.MapDelete("/api/coupon/{id:int}", (int id) => {
+    return Results.Ok(CouponStore.couponList.FirstOrDefault(x => x.Id == id));
+});
+
 app.UseHttpsRedirection();
 
 
