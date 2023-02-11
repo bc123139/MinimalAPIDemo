@@ -1,4 +1,5 @@
 using AutoMapper;
+using FluentValidation;
 using MagicVilla_CouponAPI;
 using MagicVilla_CouponAPI.Data;
 using MagicVilla_CouponAPI.Models;
@@ -12,6 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(typeof(MappingConfig));
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -32,11 +34,12 @@ app.MapGet("/api/coupon/{id:int}", (int id) =>
     return Results.Ok(CouponStore.couponList.FirstOrDefault(x => x.Id == id));
 });
 
-app.MapPost("/api/coupon", (IMapper _mapper,[FromBody] CouponCreateDTO couponDto) =>
+app.MapPost("/api/coupon", async (IValidator<CouponCreateDTO> _validator,IMapper _mapper,[FromBody] CouponCreateDTO couponDto) =>
 {
-    if (string.IsNullOrWhiteSpace(couponDto.Name))
+    var validationResult=await _validator.ValidateAsync(couponDto);  
+    if (!validationResult.IsValid)
     {
-        return Results.BadRequest("Invalid coupon name");
+        return Results.BadRequest(validationResult.Errors.FirstOrDefault()!.ToString());
     }
     if (CouponStore.couponList.FirstOrDefault(x => x.Name.ToLower() == couponDto.Name.ToLower()) != null)
     {
