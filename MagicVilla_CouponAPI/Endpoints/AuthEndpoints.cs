@@ -11,7 +11,8 @@ namespace MagicVilla_CouponAPI.Endpoints
         public static void ConfigureAuthEndpoints(this WebApplication app)
         {
             app.MapPost("/api/login", Login);
-            app.MapPost("/api/register", Register);
+            app.MapPost("/api/register", Register).WithName("Register").Accepts<RegisterationRequestDTO>("application/json")
+                .Produces<APIResponse>(200).Produces(400);
         }
 
         private async static Task<IResult> Register(IAuthRepository _authRepo, [FromBody] RegisterationRequestDTO model)

@@ -29,6 +29,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.ConfigureCouponEndpoints();
+app.ConfigureAuthEndpoints();
 app.UseHttpsRedirection();
 
 
