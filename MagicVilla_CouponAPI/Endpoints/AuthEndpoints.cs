@@ -1,0 +1,57 @@
+﻿using MagicVilla_CouponAPI.Models.DTO;
+using MagicVilla_CouponAPI.Models;
+using MagicVilla_CouponAPI.Repository.IRepository;
+using Microsoft.AspNetCore.Mvc;
+using System.Net;
+
+namespace MagicVilla_CouponAPI.Endpoints
+{
+    public static class AuthEndpoints
+    {
+        public static void ConfigureAuthEndpoints(this WebApplication app)
+        {
+            app.MapPost("/api/login", Login);
+            app.MapPost("/api/register", Register);
+        }
+
+        private async static Task<IResult> Register(IAuthRepository _authRepo, [FromBody] RegisterationRequestDTO model)
+        {
+            APIResponse response = new() { IsSuccess = false, StatusCode = HttpStatusCode.BadRequest };
+
+
+            bool ifUserNameisUnique = await _authRepo.IsUniqueUser(model.UserName);
+            if (!ifUserNameisUnique)
+            {
+                response.ErrorMessages.Add("Username already exists");
+                return Results.BadRequest(response);
+            }
+            var registerResponse = await _authRepo.Register(model);
+            if (registerResponse == null || string.IsNullOrEmpty(registerResponse.UserName))
+            {
+
+                return Results.BadRequest(response);
+            }
+
+            response.IsSuccess = true;
+            response.StatusCode = HttpStatusCode.OK;
+            return Results.Ok(response);
+
+        }
+
+        private async static Task<IResult> Login(IAuthRepository _authRepo, [FromBody] LoginRequestDTO model)
+        {
+            APIResponse response = new() { IsSuccess = false, StatusCode = HttpStatusCode.BadRequest };
+            var loginResponse = await _authRepo.Login(model);
+            if (loginResponse == null)
+            {
+                response.ErrorMessages.Add("Username or password is incorrect");
+                return Results.BadRequest(response);
+            }
+            response.Result = loginResponse;
+            response.IsSuccess = true;
+            response.StatusCode = HttpStatusCode.OK;
+            return Results.Ok(response);
+
+        }
+    }
+}
