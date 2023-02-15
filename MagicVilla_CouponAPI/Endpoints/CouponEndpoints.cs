@@ -12,7 +12,7 @@ namespace MagicVilla_CouponAPI.Endpoints
     {
         public static void ConfigureCouponEndpoints(this WebApplication app)
         {
-            app.MapGet("/api/coupon", GetAllCoupons);
+            app.MapGet("/api/coupon", GetAllCoupons).RequireAuthorization("AdminOnly");
 
             app.MapGet("/api/coupon/{id:int}", GetCoupon);
 
